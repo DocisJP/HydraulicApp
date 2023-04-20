@@ -1,0 +1,490 @@
+# Importar librería math
+import math
+import matplotlib.pyplot as plt
+
+while True:
+
+
+      print("""¿A que sección del programa desea ingresar? 
+            (1) A la sección práctica
+            (2) A la subsección de práctica (permite ingresar la orientación del tubo) 
+            (3) A la sección teórica """)
+
+      opcion = int(input("Seleccione una opción: "))
+      if opcion == 1:
+            print("Usted a seleccionado el contenido práctico")
+            # Pedir al usuario los valores de entrada
+            print("A continuación se le pedira que ingrese por teclado distintos valores para poder realizar"
+                  "los calculos necesarios: ")
+            d = float(input("Ingrese el diámetro de la tubería (m): "))
+            h1 = float(input("Ingrese la altura inicial del fluido (m): "))
+            h2 = float(input("Ingrese la altura final del fluido (m): "))
+            rho = float(input("Ingrese la densidad con la que desea trabajar (Kg/m^3): "))
+            print("La aceleración debido a la gravedad, va a ser utilizada por default en m/s^2")
+
+            # Definir las constantes
+            g = 9.81  # Aceleración debido a la gravedad en m/s^2
+
+            # Calcular las velocidades del fluido en los puntos 1 y 2
+            velocidad1 = math.sqrt(2 * g * h1)
+            velocidad2 = math.sqrt(2 * g * h2)
+
+            # Calcular la presión en los puntos 1 y 2
+            presion1 = rho * g * h1 + 0.5 * rho * velocidad1 ** 2
+            presion2 = rho * g * h2 + 0.5 * rho * velocidad2 ** 2
+
+            # Calcular el caudal
+            area = (math.pi * d ** 2) / 4
+            caudal = area * velocidad1
+
+            # Imprimir los resultados
+            print(f"""Velocidad en el punto 1: {velocidad1} m/s
+                  "Velocidad en el punto 2: {velocidad2} m/s
+                  "Presión en el punto 1: {presion1}  Pa
+                  "Presión en el punto 2: {presion2} Pa
+                  "Caudal: {caudal} m^3/s""")
+
+            # Cálculo de la velocidad y la caída de presión
+            v = (2 * g * (h1 - h2)) ** (1 / 2)
+            dp = (v ** 2 * d / 2) * 1000
+
+            # Imprimimos los resultados
+            print("La velocidad promedio del fluido es: {:.2f} m/s".format(v))
+            print("La caída de presión es: {:.2f} Pa".format(dp))
+
+            # Creamos el gráfico
+            alturas = [h1, h2]
+            variables = [v, dp]
+            fig, ax = plt.subplots()
+            ax.bar(["Velocidad", "Caída de presión"], variables)
+            ax.set_ylabel("Valor")
+            ax.set_title("Valores en función de la altura")
+            plt.show()
+      if opcion == 2:
+            # Obtener la orientación del tubo
+            orientation = input("Ingrese la orientación del tubo (h, v, d): ")
+            while orientation not in ['h', 'v', 'd']:
+                  orientation = input(
+                        "Orientación no válida. Ingrese 'h' para horizontal, 'v' para vertical o 'd' para diagonal: ")
+
+            # Solicitar el largo del tubo
+            largo_tubo = float(input("Ingrese el largo del tubo en metros: "))
+
+            # Solicitar el diámetro del tubo
+            diameter = float(input("Ingrese el diámetro del tubo en metros: "))
+
+            # Calcular el área de la sección transversal del tubo
+            area = math.pi * (diameter / 2) ** 2
+
+            # Crear un eje cartesiano
+            fig, ax = plt.subplots()
+
+            # Definir los puntos en el tubo
+            if orientation == 'h':
+                  x_coords = [0, 10, 20, 30, 40, 50]
+                  y_coords = [10] * 6
+            elif orientation == 'v':
+                  x_coords = [10] * 6
+                  y_coords = [0, 5, 7, 12, 8, 6]
+            else:
+                  x_coords = [0, 10, 20, 30, 40, 50]
+                  y_coords = [0, 5, 10, 15, 20, 25]
+
+            # Graficar el tubo
+            ax.plot(x_coords, y_coords, color='b')
+            ax.set_xlabel('Posición en el eje x (metros)')
+            ax.set_ylabel('Altura en el eje y (metros)')
+
+            # Obtener la selección del usuario de los dos puntos
+            point1 = int(input("Ingrese el índice del primer punto (0-5): "))
+            point2 = int(input("Ingrese el índice del segundo punto (0-5): "))
+
+            # Obtener la velocidad y la presión en los puntos seleccionados
+            velocity1 = math.sqrt(2 * 9.81 * y_coords[point1])
+            velocity2 = math.sqrt(2 * 9.81 * y_coords[point2])
+            pressure1 = 1000 * 9.81 * y_coords[point1] + 0.5 * 1000 * velocity1 ** 2
+            pressure2 = 1000 * 9.81 * y_coords[point2] + 0.5 * 1000 * velocity2 ** 2
+
+            # Calcular la relación de velocidades, presiones y alturas
+            velocity_ratio = velocity2 / velocity1
+            pressure_ratio = pressure2 / pressure1
+            height_diff = (y_coords[point2] - y_coords[point1]) * (
+                    1 - (diameter ** 4 / (4 * y_coords[point1] * y_coords[point2])))
+
+            # Calcular el caudal utilizando la ecuación de continuidad
+            flow_rate = velocity1 * area
+
+            # Graficar los puntos seleccionados en el tubo
+            ax.scatter(x_coords[point1], y_coords[point1], s=100, color='r', marker='o', label='Punto 1')
+            ax.scatter(x_coords[point2], y_coords[point2], s=100, color='g', marker='o', label='Punto 2')
+            # Agregar una línea vertical que represente el largo del tubo
+            ax.axvline(x=largo_tubo, color='k', linestyle='--', label='Largo del tubo')
+
+            ax.legend()
+
+            # Imprimir la velocidad, presión y altura en los dos puntos seleccionados
+            print("\nPunto 1:")
+            print("Velocidad: {} m/s".format(round(velocity1, 2)))
+            print("Presión: {} Pa".format(round(pressure1, 2)))
+            print("Altura: {} m".format(round(y_coords[point1], 2)))
+            print("Punto 2:")
+            print("Velocidad: {} m/s".format(round(velocity2, 2)))
+            print("Presión: {} Pa".format(round(pressure2, 2)))
+            print("Altura: {} m".format(round(y_coords[point2], 2)))
+
+            # Imprimir la relación de velocidades, presiones y alturas
+            print("\nRelación de velocidades: {} veces más rápido".format(round(velocity_ratio, 2)))
+            print("Relación de presiones: {} veces más alta".format(round(pressure_ratio, 2)))
+            print("Diferencia de altura: {} m".format(round(height_diff, 2)))
+            print("Caudal: {} m³/s".format(round(flow_rate, 2)))
+
+            plt.show()
+      elif opcion == 3:
+            print("""Usted selecciono el contendio teórico
+                  \nSeleccione que contenido desea revisar
+                  (1)¿Qué es la Hidrostática?
+                  (2)¿Qué es la Hidrodinámica?
+                  (3)¿Qué es la presión y como la medimos?
+                  (4)¿Que es el caudal y que caracteristicas tiene?
+                  (5)El principio de arquimedes y como se aplica
+                  (6)Bernoulli
+                  (7)Demostración, despeje de velocidad comparando dos puntos (Bernoulli)
+                  (8)Torricelli
+                  (9)Tubo de Venturi
+                  (10)Tubo de Bourdon
+                  (11)Fluidos ideales y reales
+                  (12)Propiedades de los fluidos
+                  (13)Lineas de Flujo """)
+
+            contenido = int(input("Escriba en el teclado el contenido al que desea acceder: "))
+            if contenido == 1:
+                  print("""Usted selecciono Hidrostática: 
+                        La hidrostática es la rama de la física que estudia los fluidos en reposo y las fuerzas que actúan 
+                        sobre ellos. 
+                        Se enfoca en el estudio de la presión, la densidad y el volumen de los líquidos y los gases, 
+                        y cómo estas variables afectan el comportamiento de los fluidos.
+
+                        En hidrostática, se considera que los fluidos son continuos y que las fuerzas que actúan sobre ellos son equilibradas.
+                        La presión en un fluido en reposo es uniforme en todas las direcciones y aumenta con la profundidad. 
+                        Esta presión se debe al peso del fluido y la fuerza de la gravedad.
+
+                        La hidrostática se aplica en muchos campos de la ciencia y la ingeniería,
+                        incluyendo la construcción de presas y represas, el diseño de barcos y submarinos,
+                         y la medición de la presión arterial en medicina, entre otros. """)
+            elif contenido == 2:
+                  print("""Usted selecciono Hidrodinámica
+                        La hidrodinámica es la rama de la física que estudia los fluidos en movimiento
+                        y cómo se comportan bajo diferentes condiciones.
+                        Se enfoca en el estudio de las fuerzas que actúan sobre los fluidos en movimiento, 
+                        como la viscosidad, la presión y la densidad, y cómo estos factores afectan 
+                        el flujo de los fluidos.
+
+                        La hidrodinámica se utiliza para estudiar una amplia variedad de fenómenos, incluyendo la circulación 
+                        del agua en los océanos,
+                        los procesos de transporte de los ríos, la aerodinámica de los aviones y la formación de vórtices y 
+                        turbulencias en los fluidos.
+
+                        La hidrodinámica también tiene muchas aplicaciones prácticas en la ingeniería,
+                        como el diseño de turbinas hidráulicas, el desarrollo de sistemas de tuberías, 
+                        la optimización del rendimiento de los motores de combustión interna y 
+                        la construcción de puentes y diques, entre otros.""")
+            elif contenido == 3:
+                  print("""Usted selecciono en relación a la presión y sus formas de medición
+                        La presión es una medida de la fuerza ejercida por un objeto sobre una unidad de superficie. 
+                        En el contexto de los fluidos, la presión se refiere a la fuerza por unidad de área que ejerce 
+                        un fluido sobre una superficie en contacto con él.
+
+                        La presión se mide en unidades de fuerza divididas por unidades de área, como pascal (Pa),
+                        que equivale a una fuerza de un newton por metro cuadrado (N/m²), 
+                        o libra por pulgada cuadrada (psi), que equivale a una fuerza de una libra por pulgada cuadrada.
+
+                        Existen varios instrumentos utilizados para medir la presión en
+                        los fluidos, entre los más comunes se encuentran: 
+
+                        (a)Manómetro: es un dispositivo que mide la presión de un 
+                        fluido en relación a la presión atmosférica.
+                        Se puede clasificar en manómetros de tubo en U, 
+                        manómetros de bourdon, manómetros digitales, entre otros.
+                        (b)Barómetro: es un instrumento que se utiliza para medir la presión atmosférica.
+                        La unidad de medida comúnmente utilizada es el milímetro de mercurio (mmHg).
+                        (c)Pirómetro: es un instrumento que se utiliza para medir la presión en un ambiente en el que hay
+                         gases en estado de alta presión y temperatura.
+
+                        En resumen, la presión es una medida de la fuerza que ejerce un
+                        objeto sobre una unidad de superficie,
+                        y se mide en unidades de fuerza divididas por unidades de área.
+                        La elección del instrumento de medición
+                        dependerá de las condiciones en las que se encuentra el fluido y 
+                        la precisión necesaria en la medición.""")
+            elif contenido == 4:
+                  print("""Usted a selecciono el contenido relacionado al caudal: 
+
+                        El caudal se refiere a la cantidad de flujo de un líquido o gas que pasa por un punto
+                        en un cierto período de tiempo. 
+                        Es una medida de la cantidad de fluido que fluye a través de un 
+                        área determinada por unidad de tiempo.
+
+                        El caudal se define como una magnitud escalar porque solo representa la 
+                        cantidad de fluido que fluye por unidad de tiempo,
+                        sin tener en cuenta su dirección.
+                        A diferencia de las magnitudes vectoriales,
+                        como la velocidad o la aceleración, que tienen una dirección y una magnitud.
+
+                        La fórmula para calcular el caudal (Q) es:
+
+                        Q = A * V
+
+                        Donde A es el área transversal de la sección del conducto a través del cual fluye el fluido y 
+                        V es la velocidad del fluido. El resultado se expresa en unidades de volumen por unidad de tiempo,
+                        como metros cúbicos por segundo (m³/s) o litros por segundo (L/s).""")
+            elif contenido == 5:
+                  print("""Usted selecciono el principio de arquimedes y como se aplica
+
+                        El principio de Arquímedes es un principio físico que establece que todo cuerpo
+                        sumergido en un fluido experimenta una fuerza hacia arriba igual al peso del fluido
+                        desalojado por el cuerpo. Este principio se aplica en 
+                        situaciones en las que un objeto está parcial o completamente sumergido
+                        en un fluido, ya sea líquido o gas.
+
+                        La fórmula para calcular la fuerza de empuje (F) que experimenta un cuerpo sumergido es: 
+
+                        F = ρ * V * g
+
+                         Donde ρ es la densidad del fluido en el que está sumergido el cuerpo, V es el volumen del fluido
+                        desplazado por el cuerpo y g es la aceleración debido a la gravedad.
+
+                        El principio de Arquímedes tiene muchas aplicaciones en la vida cotidiana y en la ciencia.
+                        Algunas de estas aplicaciones son :
+
+                        *En la flotación de barcos y submarinos: La fuerza de empuje que experimentan estos objetos
+                        les permite flotar y desplazarse en el agua.
+                        *En la medición de la densidad de un objeto: Si se conoce la masa y el volumen del objeto, se puede
+                        sumergir en agua para medir su volumen desplazado y, por lo tanto, su densidad.
+                        *n la fabricación de materiales ligeros: Los diseñadores de materiales pueden utilizar el principio
+                        de Arquímedes para crear materiales ligeros que floten en un fluido, como los materiales
+                        de construcción de los aviones.
+                        *En la separación de líquidos:
+                        Los líquidos con diferentes densidades pueden ser separados utilizando
+                        el principio de Arquímedes. 
+                        Por ejemplo, el petróleo y el agua pueden ser separados utilizando un tanque de
+                        sedimentación que aprovecha la diferencia de densidad entre los dos líquidos.""")
+            elif contenido == 6:
+                  print("""Usted seleccionó el contenido relacionado a Bernoulli
+
+                        El principio de Bernoulli es un principio físico que
+                        describe la relación entre la velocidad de un fluido y su presión.
+                        Según este principio, cuando un fluido se mueve a través de un conducto,
+                        su velocidad aumenta en las zonas de 
+                        menor presión y disminuye en las zonas de mayor presión.
+
+                         La fórmula de Bernoulli establece que la suma de la presión estática (P), 
+                        la presión dinámica (ρv²/2)
+                        y la energía potencial por unidad de peso (ρgh) es constante en un fluido en movimiento.
+                        La fórmula matemática es la siguiente:
+
+                        P + 1/2 ρv² + ρgh = constante
+
+                        Donde ρ es la densidad del fluido, v es la velocidad del fluido, g es la aceleración debido a la
+                        gravedad y h es la altura del fluido por encima de un punto de referencia.
+
+                        El principio de Bernoulli tiene muchos usos prácticos en la vida cotidiana y en la ciencia.
+                        Algunos ejemplos son :
+
+                        *En la aviación: El principio de Bernoulli explica cómo las alas de los aviones
+                        generan sustentación al moverse a través del aire. 
+                        El aire que fluye por encima del ala tiene una velocidad mayor y una presión menor que
+                        el aire que fluye por debajo del ala,
+                        lo que genera una fuerza de sustentación que levanta el avión en el aire.
+                        *En la hidráulica: El principio de Bernoulli se utiliza en la hidráulica para
+                        medir el caudal de un fluido. Si se mide la presión y la velocidad en dos secciones de un conducto,
+                        se puede calcular el caudal del fluido utilizando la fórmula de Bernoulli.
+                        *En la medicina: El principio de Bernoulli se aplica en la medicina para entender cómo fluye
+                        el aire a través de los pulmones y las vías respiratorias.
+                        También se utiliza para explicar la formación de coágulos de sangre en las arterias estrechas.
+                        *En la meteorología: El principio de Bernoulli se utiliza en la meteorología para explicar el
+                        movimiento del aire y la formación de sistemas climáticos,
+                        como los frentes atmosféricos y los vientos.""")
+            elif contenido == 7:
+                  print("""\nUsted selecciono la demostración del despeje de velocidad
+
+                        La ecuación de Bernoulli en su forma más simple es:
+
+                        P1 + 1/2 * ρ * v1^2 + ρ * g * h1 = P2 + 1/2 * ρ * v2^2 + ρ * g * h2
+
+                        Donde:
+
+                        P1 y P2 son las presiones en los puntos 1 y 2, respectivamente.
+                        ρ es la densidad del fluido.
+                        v1 y v2 son las velocidades en los puntos 1 y 2, respectivamente.
+                        g es la aceleración debido a la gravedad.
+                        h1 y h2 son las alturas de los puntos 1 y 2, respectivamente.
+
+                        Para despejar la velocidad v2, primero se deben cancelar las variables de presión y altura. Para hacer esto, se pueden restar las dos ecuaciones para obtener:
+
+                        P1 - P2 + 1/2 * ρ * v1^2 - 1/2 * ρ * v2^2 + ρ * g * h1 - ρ * g * h2 = 0
+
+                        Luego, se pueden reordenar los términos para obtener:
+
+                        1/2 * ρ * v2^2 = 1/2 * ρ * v1^2 + (P1 - P2) / ρ + g * (h1 - h2)
+
+                        Finalmente, se puede despejar la velocidad v2 como:
+
+                        v2 = √(2 * [1/2 * ρ * v1^2 + (P1 - P2) / ρ + g * (h1 - h2)] / ρ)
+                        """)
+            elif contenido == 8:
+                  print("""Usted seleccionó el contenido relacionado a Torricelli
+
+                        El teorema de Torricelli, también conocido como el teorema de los vasos comunicantes,
+                        es un principio físico que establece que la velocidad de salida de un líquido de un recipiente está
+                        relacionada con la altura del líquido en el recipiente.
+
+                        La fórmula para calcular la velocidad de salida (v) de un líquido de un recipiente en función de la
+                        altura del líquido (h) es:
+
+                        v = √(2gh)
+
+                        El teorema de Torricelli tiene muchos usos prácticos en la vida cotidiana y en la ciencia.
+                        Algunos ejemplos son:
+
+                        En el diseño de fuentes y cascadas: El teorema de Torricelli se aplica en el diseño de fuentes y
+                        cascadas para controlar la velocidad del agua que sale de los tubos y los grifos
+                        En la medición de caudales: El teorema de Torricelli se utiliza en la hidráulica para medir el caudal
+                        de un líquido en un conducto.
+                        Si se mide la altura del líquido en un punto y la velocidad de salida en otro punto,
+                        se puede calcular el caudal utilizando la fórmula de Torricelli.
+                        En la perforación de pozos: El teorema de Torricelli se utiliza en la perforación de pozos para
+                        controlar la presión del líquido y evitar que se desborde del pozo.
+                        En la física de fluidos: El teorema de Torricelli se utiliza en la física de fluidos para entender
+                        cómo se mueven los líquidos y los gases a través de los conductos y los tubos.""")
+            elif contenido == 9:
+                  print("""Usted selecciono el tubo de Venturi
+
+                        El tubo de Venturi es un dispositivo que se utiliza para medir 
+                        la velocidad de un fluido en un conducto. 
+                        Fue inventado por el físico italiano Giovanni Battista Venturi en el siglo XVIII. 
+                        El tubo de Venturi consiste en un tubo estrecho con una sección cónica, 
+                        que se coloca en un conducto por el que fluye el fluido.
+
+                        La explicación física del tubo de Venturi se basa en el principio de Bernoulli.
+                        Cuando un fluido se mueve a través de una sección estrecha de un tubo,
+                        su velocidad aumenta y su presión disminuye.
+                        En el tubo de Venturi, la sección cónica provoca una aceleración del fluido y
+                        una disminución de la presión.
+                        La diferencia de presión entre la sección estrecha y la sección ancha del tubo se puede medir y
+                        se utiliza para calcular la velocidad del fluido.
+
+                        El tubo de Venturi tiene varios usos prácticos, algunos de ellos son:
+                        En la industria: El tubo de Venturi se utiliza en la
+                        industria para medir la velocidad y el caudal de fluidos en conductos,
+                        como el agua o el aire.
+                        Por ejemplo, se utiliza para medir el caudal de agua en sistemas
+                        de riego o en sistemas de refrigeración de maquinaria.
+                        En la aviación: El tubo de Venturi se utiliza en la aviación para medir la velocidad del aire que
+                        fluye sobre las alas de un avión.
+                        La velocidad del aire se utiliza para calcular la velocidad y la altitud del avión.
+                        En la medicina: El tubo de Venturi se utiliza en la medicina para administrar oxígeno a los
+                        pacientes con dificultad para respirar.
+                        El tubo de Venturi permite ajustar la cantidad de oxígeno que se suministra al
+                        paciente en función de su necesidad.""")
+            elif contenido == 10:
+                  print("""Usted selecciono el contenido relacionado al tubo de Bourdon
+
+                        El tubo de Bourdon es un dispositivo mecánico que se 
+                        utiliza para medir la presión de un fluido en un 
+                        recipiente cerrado, como un tanque o una tubería.
+
+                        Consiste en un tubo curvado en forma de C, hecho de un material metálico resistente, como acero 
+                        inoxidable o latón, que se conecta a la fuente de presión a través de un orificio.
+
+                        Cuando la presión dentro del recipiente aumenta, el tubo de Bourdon tiende a enderezarse, 
+                        lo que provoca un movimiento en su extremo libre. 
+                        Este movimiento se transmite a un dispositivo de lectura, 
+                        como un indicador mecánico o una pantalla digital, que muestra la magnitud de la presión.
+                        La explicación física del tubo de Bourdon se basa en el principio de la elasticidad
+                        de los materiales.
+                        Cuando el fluido entra en el tubo de Bourdon, 
+                        la presión del fluido provoca una deformación del tubo.
+                        La deformación del tubo se mide mediante un indicador mecánico,
+                        que puede ser una aguja o un indicador digital.
+                        La indicación de la deformación se utiliza para medir la presión del fluido.
+
+                        El tubo de Bourdon tiene varios usos prácticos, algunos de ellos son:
+                        En la industria: El tubo de Bourdon se utiliza en la industria para medir la presión de líquidos y
+                        gases en tuberías y tanques. Por ejemplo, se utiliza para medir la presión del 
+                        agua en sistemas de riego o la presión del gas en sistemas de calefacción.
+                        En la aviación: El tubo de Bourdon se utiliza en la aviación para medir la presión del aire en
+                        el interior de la cabina de un avión.
+                        La presión del aire se utiliza para mantener una presión adecuada en el interior de la
+                        cabina a altitudes elevadas.""")
+            elif contenido == 11:
+                  print("""\nUsted seleccionó el contenido relacionado a fluidos ideales y reales
+
+                              Un fluido ideal es un modelo teórico de un fluido que se utiliza para simplificar los cálculos y 
+                              la comprensión de los sistemas hidráulicos. A diferencia de los fluidos reales, que tienen propiedades 
+                              como la viscosidad y la compresibilidad que afectan su comportamiento, los fluidos ideales se
+                              caracterizan por no tener viscosidad, ser incompresibles y tener un flujo uniforme.
+
+                              Los fluidos ideales no tienen fricción interna, lo que significa que no hay pérdida de energía 
+                              debido a la viscosidad y que no se requiere energía adicional para mover el fluido. Además, 
+                              los fluidos ideales son incompresibles, lo que significa que su densidad es constante y 
+                              no cambia con la presión. Esto simplifica los cálculos y las ecuaciones que se utilizan para 
+                              modelar sistemas hidráulicos.
+
+                              Si bien los fluidos ideales son útiles para simplificar los cálculos y la comprensión de los 
+                              sistemas hidráulicos, es importante tener en cuenta que no existen en la vida real. Los fluidos 
+                              reales siempre tienen una cierta cantidad de fricción y viscosidad, lo que puede afectar el 
+                              comportamiento y la eficiencia de los sistemas hidráulicos. Por lo tanto, los modelos que 
+                              utilizan fluidos ideales se utilizan principalmente como herramientas de análisis y como punto 
+                              de partida para el diseño de sistemas hidráulicos.""")
+            elif contenido == 12:
+                  print("""Usted selecciono propiedades del fluido: 
+
+                        \nUn fluido es una sustancia que tiene la capacidad de fluir y no tiene una forma definida. 
+                        Los fluidos pueden ser líquidos o gases y se caracterizan por su capacidad para cambiar de forma y 
+                        adaptarse a la forma del recipiente en el que se encuentran.
+
+                        En hidráulica, algunas de las propiedades más importantes de los fluidos incluyen :
+
+                        \n Viscosidad: La viscosidad de un fluido es su resistencia a fluir y es importante en hidráulica 
+                        porque puede afectar la velocidad del flujo y la cantidad de energía necesaria para mover el fluido 
+                        a través de un sistema.
+
+                        Densidad: La densidad de un fluido es su masa por unidad de volumen y es importante en hidráulica 
+                        porque afecta la fuerza y la presión que el fluido ejerce sobre las paredes de un contenedor 
+                        o sistema hidráulico.
+
+                        Presión: La presión de un fluido es la fuerza por unidad de área que ejerce sobre las 
+                        paredes de un contenedor o sistema hidráulico y es importante en hidráulica porque puede usarse para 
+                        generar fuerza y movimiento en un sistema.
+
+                        Fluidez: La fluidez de un fluido es su capacidad para fluir y es importante en hidráulica porque 
+                        permite que el fluido se mueva a través de tuberías, válvulas y otros componentes del sistema hidráulico.
+
+                        Compresibilidad: La compresibilidad de un fluido es su capacidad para cambiar de volumen bajo presión 
+                        y es importante en hidráulica porque puede afectar la respuesta y la eficiencia 
+                        del sistema hidráulico.
+
+                        """)
+            elif contenido == 13:
+                  print("""Usted a seleccionado lineas de fujo: 
+
+                  \nLas lineas de flujo en hidráulica son líneas imaginarias que representan la dirección y el patrón del 
+                  flujo de un fluido en un sistema hidráulico. Las líneas de flujo se dibujan en un plano perpendicular a la 
+                  dirección del flujo y se utilizan para visualizar la trayectoria del fluido en un punto 
+                  dado en el sistema.
+
+                  En un sistema hidráulico, las líneas de flujo pueden ser rectas, curvas o irregulares, dependiendo 
+                  del tipo de flujo que esté ocurriendo. Las líneas de flujo rectas indican un flujo uniforme y constante, 
+                  mientras que las líneas curvas indican un flujo turbulento o con vórtices. 
+                  Las líneas irregulares pueden indicar obstrucciones o cambios abruptos en la dirección del flujo.
+
+                  Las líneas de flujo se utilizan en la hidráulica para ayudar en el diseño y la optimización de sistemas 
+                  hidráulicos. Por ejemplo, al visualizar las líneas de flujo, los ingenieros pueden identificar puntos de 
+                  congestión o cuellos de botella en el sistema y hacer ajustes para mejorar la eficiencia y el rendimiento 
+                  del sistema. Además, las líneas de flujo pueden ser utilizadas para predecir la trayectoria de partículas 
+                  suspendidas en el fluido, lo que puede ser importante en aplicaciones como la filtración o la separación 
+                  de sólidos.""")
+      condicion = str(input("Desea continuar con el programa? (si/no)"))
+      if condicion != "Si" and condicion != "si":
+            break
+            print("Gracias! Vuelva pronto!")
